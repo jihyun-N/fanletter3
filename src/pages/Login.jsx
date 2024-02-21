@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import api from "../axios/api";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { login } from "store/modules/authSlice";
 
 export default function Login() {
   // 1 = 로그인, 0 = 회원가입
@@ -11,54 +8,32 @@ export default function Login() {
   const togglePage = () => {
     setPageState(!pageState);
   };
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
-  const [nickName, setNickName] = useState("");
+  const [nickname, setNickname] = useState("");
 
   const joinUser = async (e) => {
     e.preventDefault();
-    const newRegister = {
+    const joinInfo = {
       id,
       password,
-      nickName,
+      nickname,
     };
-    try {
-      const { data } = await api.post("/register", newRegister);
-      setPageState(!pageState);
-      console.log(data);
-    } catch (error) {
-      alert(error.response.message);
-      return false;
-    }
+    const { data } = await api.post("/register", joinInfo);
+    console.log(data);
   };
 
   const loginUser = async (e) => {
     e.preventDefault();
-    try {
-      const { data } = await api.post("/login", { id, password });
-      console.log("로그인 응답값 확인해보자구");
-      console.log(data);
-      const { accessToken, userId, success, avatar, nickname } = Response.data;
-      localStorage.setItem("accessToken", JSON.stringify(accessToken));
-      localStorage.setItem("userId", JSON.stringify(userId));
-      localStorage.setItem("avatar", JSON.stringify(avatar));
-      localStorage.setItem("nickname", JSON.stringify(nickname));
-      dispatch(
-        login({
-          accessToken,
-          userId,
-          success,
-          avatar,
-          nickname,
-        })
-      );
-      navigate("/");
-    } catch (error) {
-      alert(error.response.data.message);
-    }
+    const loginInfo = {
+      id,
+      password,
+    };
+    const { data } = await api.post("/login", loginInfo);
+    console.log("로그인 응답값 확인해보자구");
+    console.log(data);
+    localStorage.setItem("token", data.accessToken);
   };
   return (
     <div>
@@ -71,6 +46,10 @@ export default function Login() {
             minLength={4}
             maxLength={10}
             required
+            onChange={(e) => {
+              setId(e.target.value);
+            }}
+            value={id}
           />
           <input
             type="password"
@@ -78,6 +57,10 @@ export default function Login() {
             minLength={4}
             maxLength={15}
             required
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+            value={password}
           />
           <Button onClick={loginUser}>로그인</Button>
           <Button onClick={togglePage}>회원가입</Button>
@@ -94,6 +77,7 @@ export default function Login() {
             onChange={(e) => {
               setId(e.target.value);
             }}
+            value={id}
           />
           <input
             type="password"
@@ -104,6 +88,7 @@ export default function Login() {
             onChange={(e) => {
               setPassword(e.target.value);
             }}
+            value={password}
           />
           <input
             type="text"
@@ -112,8 +97,9 @@ export default function Login() {
             maxLength={10}
             required
             onChange={(e) => {
-              setNickName(e.target.value);
+              setNickname(e.target.value);
             }}
+            value={nickname}
           />
           <Button onClick={joinUser} type="submit">
             회원가입
